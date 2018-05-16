@@ -16,7 +16,7 @@ const {google} = require('googleapis');
 const readline = require('readline'); // TODO: replace this with prompt
 const fs = require('fs');
 
-const TOKEN_PATH = 'credentials.json';
+const TOKEN_PATH = '/Users/gbanis/dev/personal/code-cave/credentials.json';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
@@ -102,7 +102,7 @@ program
         }
         return true;
       },
-      default: 30
+      default: 60
     }]).then(async answers => {
       const durationMins = parseInt(answers.durationMins);
       const start = moment().valueOf();
@@ -121,7 +121,7 @@ program
       });
 
       try {
-        const content = fs.readFileSync('client_secret.json');
+        const content = fs.readFileSync('/Users/gbanis/dev/personal/code-cave/client_secret.json');
         authorize(JSON.parse(content), createEvent(start, end));
       } catch (err) {
         return console.log('Error loading client secret file:', err);
