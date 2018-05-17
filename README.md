@@ -1,7 +1,5 @@
 ![code-cave](https://git.hubteam.com/storage/user/519/files/11fd42ba-5965-11e8-807d-28f08b974210)
 
-Enter focus mode, leave all your worries behind and code away...
-
 ### How it works
 
 Pick how long you want to be in "code cave" mode and it:
