@@ -12,7 +12,7 @@ const colors = require ('colors');
 const { CronJob } = require('cron');
 const cache = require('persistent-cache');
 
-const { authorize, createEvent } = require('./apis/googleCalendar.js');
+const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
 
 const db = cache();
@@ -63,6 +63,8 @@ program
         db.putSync('googleClientSecret', answers.googleClientSecret);
         console.log('Updated Google client secret'.green);
       }
+
+      getAccessToken();
     });
   });
 
@@ -100,11 +102,7 @@ program
       setCaveStatus(token, moment(end).format('h:mm a'));
       setDnd(token, durationMins);
 
-      try {
-        authorize(createEvent(start, end));
-      } catch (err) {
-        return console.log('Error loading client secret file:', err);
-      }
+      authorize(createEvent(start, end));
 
       const job = new CronJob(moment(end).toDate(), function() {
           emerge();

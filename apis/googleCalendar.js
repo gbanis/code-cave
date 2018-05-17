@@ -1,6 +1,7 @@
 const { google } = require('googleapis');
 const moment = require('moment');
 const cache = require('persistent-cache');
+const { prompt } = require('inquirer');
 
 const readline = require('readline'); // TODO: replace this with prompt
 
@@ -17,8 +18,7 @@ const authorize = (callback) => {
 
   const {client_secret, client_id, redirect_uris} = JSON.parse(credentials).installed;
 
-  const oAuth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0]);
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
   const token = db.getSync('googleToken');
 
@@ -26,7 +26,7 @@ const authorize = (callback) => {
     throw 'Token is not configured; you need to oauth. Please run \`codecave config\` to set that up.'
   }
 
-  oAuth2Client.setCredentials(JSON.parse(token));
+  oAuth2Client.setCredentials(token);
   callback(oAuth2Client);
 };
 
@@ -47,7 +47,11 @@ const createEvent = (start, end) => {
   };
 };
 
-const getAccessToken = (oAuth2Client, callback) => {
+const getAccessToken = () => {
+  const credentials = db.getSync('googleClientSecret');
+  const {client_secret, client_id, redirect_uris} = JSON.parse(credentials).installed;
+  const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+
   const authUrl = oAuth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: SCOPES,
@@ -55,19 +59,20 @@ const getAccessToken = (oAuth2Client, callback) => {
 
   console.log('Authorize this app by visiting this url:', authUrl);
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  rl.question('Enter the code from that page here: ', (code) => {
-    rl.close();
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) return callback(err);
-      oAuth2Client.setCredentials(token);
-
-      db.putSync('googleToken', JSON.stringify(token));
-      callback(oAuth2Client);
+  prompt([{
+    type : 'input',
+    name : 'code',
+    message : 'Enter the code from that page here:',
+    validate: (input) => {
+      if (input.length === 0) {
+        return 'Invalid token';
+      }
+      return true;
+    }
+  }]).then(answers => {
+    oAuth2Client.getToken(answers.code, (err, token) => {
+      console.log(token);
+      db.putSync('googleToken', token);
     });
   });
 };
@@ -89,5 +94,6 @@ const buildEvent = (start, end) => {
 
 module.exports = {
   authorize,
-  createEvent
+  createEvent,
+  getAccessToken
 };
