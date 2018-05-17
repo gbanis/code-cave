@@ -17,9 +17,13 @@ Install the latest node version. I used `$ nvm install v9.3.0`.
 
 Run yarn `$ yarn`.
 
-### Usage
+Set up your default status: `$ codecave defaults`
 
-`codecave config` - set up your slack and google cal creds
+Set up your slack and google cal creds: `$ codecave config`
+
+You are probably good to go.
+
+### Usage
 
 `codecave enter` - enter the cave, after N minutes you will exit automagically
 

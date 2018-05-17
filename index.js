@@ -26,6 +26,24 @@ program
   .description('Code Cave');
 
 program
+  .command('defaults')
+  .description('Set up default messages')
+  .action(() => {
+    prompt([{
+      type: 'input',
+      name: 'defaultStatus',
+      message: 'Enter default status:'
+    }, {
+      type: 'input',
+      name: 'defaultEmoji',
+      message: 'Enter default emoji:'
+    }]).then(answers => {
+      db.putSync('defaultStatus', answers.defaultStatus);
+      db.putSync('defaultEmoji', answers.defaultEmoji);
+    });
+  });
+
+program
   .command('config')
   .description('One time config of the app')
   .action(() => {

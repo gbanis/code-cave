@@ -1,13 +1,18 @@
 const fetch = require('node-fetch');
+const cache = require('persistent-cache');
 
-const DEFAULT_STATUS = {
-  "status_text": "Teaching machines",
-  "status_emoji": ":ml-sprocket:"
+const db = cache();
+
+const getDefaultStatus = () => {
+  return {
+    "status_text": db.getSync('defaultStatus'),
+    "status_emoji": db.getSync('defaultEmoji')
+  };
 };
 
 const getCaveStatus = (endTime) => {
   return {
-    "status_text": `In code cave. Will emerge at ${endTime}`,
+    "status_text": `In code cave. I'll be back at ${endTime}`,
     "status_emoji": ":code-cave:"
   };
 };
@@ -19,7 +24,7 @@ const setCaveStatus = (token, endTime) => {
 };
 
 const setDefaultStatus = (token) => {
-  fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(DEFAULT_STATUS)}`, {
+  fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(getDefaultStatus())}`, {
     method: "POST"
   });
 };
