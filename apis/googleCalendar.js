@@ -1,22 +1,31 @@
-const {google} = require('googleapis');
-const readline = require('readline'); // TODO: replace this with prompt
-const fs = require('fs');
+const { google } = require('googleapis');
+const moment = require('moment');
+const cache = require('persistent-cache');
 
-const TOKEN_PATH = '/Users/gbanis/dev/personal/code-cave/credentials.json';
+const readline = require('readline'); // TODO: replace this with prompt
+
+const db = cache();
+
 const SCOPES = ['https://www.googleapis.com/auth/calendar'];
 
-const authorize = (credentials, callback) => {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
-  let token = {};
+const authorize = (callback) => {
+  const credentials = db.getSync('googleClientSecret');
+
+  if (typeof credentials === 'undefined') {
+    throw 'Google creds not configured. Please run \`codecave config\` to set that up.'
+  }
+
+  const {client_secret, client_id, redirect_uris} = JSON.parse(credentials).installed;
+
   const oAuth2Client = new google.auth.OAuth2(
       client_id, client_secret, redirect_uris[0]);
 
-  // Check if we have previously stored a token.
-  try {
-    token = fs.readFileSync(TOKEN_PATH);
-  } catch (err) {
-    return getAccessToken(oAuth2Client, callback);
+  const token = db.getSync('googleToken');
+
+  if (typeof token === 'undefined') {
+    throw 'Token is not configured; you need to oauth. Please run \`codecave config\` to set that up.'
   }
+
   oAuth2Client.setCredentials(JSON.parse(token));
   callback(oAuth2Client);
 };
@@ -43,23 +52,21 @@ const getAccessToken = (oAuth2Client, callback) => {
     access_type: 'offline',
     scope: SCOPES,
   });
+
   console.log('Authorize this app by visiting this url:', authUrl);
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
+
   rl.question('Enter the code from that page here: ', (code) => {
     rl.close();
     oAuth2Client.getToken(code, (err, token) => {
       if (err) return callback(err);
       oAuth2Client.setCredentials(token);
-      // Store the token to disk for later program executions
-      try {
-        fs.writeFileSync(TOKEN_PATH, JSON.stringify(token));
-        // console.log('Token stored to', TOKEN_PATH);
-      } catch (err) {
-        console.error(err);
-      }
+
+      db.putSync('googleToken', JSON.stringify(token));
       callback(oAuth2Client);
     });
   });

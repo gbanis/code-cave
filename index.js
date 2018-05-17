@@ -9,25 +9,13 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const moment = require('moment');
 const colors = require ('colors');
-const fetch = require('node-fetch');
 const { CronJob } = require('cron');
 const cache = require('persistent-cache');
 
 const { authorize, createEvent } = require('./apis/googleCalendar.js');
+const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
 
 const db = cache();
-
-const DEFAULT_STATUS = {
-  "status_text": "Teaching machines",
-  "status_emoji": ":ml-sprocket:"
-};
-
-const getCaveStatus = (endTime) => {
-  return {
-    "status_text": `In code cave. Will emerge at ${endTime}`,
-    "status_emoji": ":code-cave:"
-  };
-}
 
 if (process.argv.length < 3) {
   program.help();
@@ -109,18 +97,11 @@ program
       const end = moment().add(durationMins, 'minutes').valueOf();
       const token = db.getSync('slackToken')
 
-      fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(getCaveStatus(moment(end).format('h:mm a')))}`, {
-        method: "POST"
-      });
-
-      fetch(`https://slack.com/api/dnd.setSnooze?token=${token}&num_minutes=${durationMins}`, {
-        method: "POST"
-      });
+      setCaveStatus(token, moment(end).format('h:mm a'));
+      setDnd(token, durationMins);
 
       try {
-        // const content = fs.readFileSync('/Users/gbanis/dev/personal/code-cave/client_secret.json');
-        const googleClientSecret = db.getSync('googleClientSecret');
-        authorize(JSON.parse(googleClientSecret), createEvent(start, end));
+        authorize(createEvent(start, end));
       } catch (err) {
         return console.log('Error loading client secret file:', err);
       }
@@ -188,13 +169,8 @@ const emerge = () => {
 
   const token = db.getSync('slackToken');
 
-  fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(DEFAULT_STATUS)}`, {
-    method: "POST"
-  });
-
-  fetch(`https://slack.com/api/dnd.endSnooze?token=${token}`, {
-    method: "POST"
-  });
+  setDefaultStatus(token);
+  endDnd(token);
 
   db.deleteSync('session');
 };
