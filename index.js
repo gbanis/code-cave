@@ -7,38 +7,19 @@
 
 const program = require('commander');
 const { prompt } = require('inquirer');
-const storage = require('node-persist');
 const moment = require('moment');
 const colors = require ('colors');
 const fetch = require('node-fetch');
 const { CronJob } = require('cron');
-const {google} = require('googleapis');
-const readline = require('readline'); // TODO: replace this with prompt
-const fs = require('fs');
+const cache = require('persistent-cache');
 
-const TOKEN_PATH = '/Users/gbanis/dev/personal/code-cave/credentials.json';
+const { authorize, createEvent } = require('./apis/googleCalendar.js');
 
-const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-
+const db = cache();
 
 const DEFAULT_STATUS = {
   "status_text": "Teaching machines",
   "status_emoji": ":ml-sprocket:"
-};
-
-const getEvent = (start, end) => {
-  return {
-    'summary': 'Code Cave',
-    'description': 'Entering a code cave. Please interrupt only if there is an emergency.',
-    'start': {
-      'dateTime': moment(start).format(),
-      'timeZone': moment.tz.guess()
-    },
-    'end': {
-      'dateTime': moment(end).format(),
-      'timeZone': moment.tz.guess()
-    }
-  };
 };
 
 const getCaveStatus = (endTime) => {
@@ -59,21 +40,41 @@ program
 program
   .command('config')
   .description('One time config of the app')
-  .action(async () => {
+  .action(() => {
     prompt([{
       type: 'input',
       name: 'slackToken',
       message: 'Enter your slack token:',
       validate: (input) => {
-        if (input.length <= 0) {
-          return "This doesn't look like a slack token 😬. \nGet one and try again https://api.slack.com/custom-integrations/legacy-tokens"
+        if (input.length <= 0 && typeof db.getSync('slackToken') === 'undefined') {
+          return "This doesn't look like a slack token 😬. \nGet one and try again: https://api.slack.com/custom-integrations/legacy-tokens"
         }
         return true;
       }
-    }]).then(async answers => {
-      await storage.init();
-      await storage.setItem('slackToken', answers.slackToken);
-      console.log('Done'.green);
+    }, {
+      type: 'input',
+      name: 'googleClientSecret',
+      message: 'Enter Google client secret:',
+      validate: (input) => {
+        if (input.length <= 0 && typeof db.getSync('googleClientSecret') === 'undefined') {
+          return "This doesn't look like a Google client secret 😬. \nGet one and try again: https://console.developers.google.com/apis/credentials"
+        }
+        return true;
+      }
+    }]).then(answers => {
+      if (answers.slackToken.length == 0 ) {
+        console.log('Not updating slack token'.yellow);
+      } else {
+        db.putSync('slackToken', answers.slackToken);
+        console.log('Updated slack token'.green);
+      }
+
+      if (answers.googleClientSecret.length == 0 ) {
+        console.log('Not updating Google client secret'.yellow);
+      } else {
+        db.putSync('googleClientSecret', answers.googleClientSecret);
+        console.log('Updated Google client secret'.green);
+      }
     });
   });
 
@@ -82,9 +83,8 @@ program
   .command('enter')
   .alias('e')
   .description('Enter the code cave (start session)')
-  .action(async () => {
-    await storage.init();
-    const session = await storage.getItem('session');
+  .action(() => {
+    const session = db.getSync('session');
 
     if (typeof session !== 'undefined') {
       console.log(`You are already in the cave! Your session started ${moment(session.start).fromNow().green}.`);
@@ -103,14 +103,11 @@ program
         return true;
       },
       default: 60
-    }]).then(async answers => {
+    }]).then(answers => {
       const durationMins = parseInt(answers.durationMins);
       const start = moment().valueOf();
       const end = moment().add(durationMins, 'minutes').valueOf();
-
-      await storage.init();
-
-      const token = await storage.getItem('slackToken');
+      const token = db.getSync('slackToken')
 
       fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(getCaveStatus(moment(end).format('h:mm a')))}`, {
         method: "POST"
@@ -121,8 +118,9 @@ program
       });
 
       try {
-        const content = fs.readFileSync('/Users/gbanis/dev/personal/code-cave/client_secret.json');
-        authorize(JSON.parse(content), createEvent(start, end));
+        // const content = fs.readFileSync('/Users/gbanis/dev/personal/code-cave/client_secret.json');
+        const googleClientSecret = db.getSync('googleClientSecret');
+        authorize(JSON.parse(googleClientSecret), createEvent(start, end));
       } catch (err) {
         return console.log('Error loading client secret file:', err);
       }
@@ -140,7 +138,7 @@ program
 
       console.log("Setting session...".yellow);
 
-      await storage.setItem('session', {
+      db.putSync('session', {
         start: start,
         durationMins: durationMins,
         end: end
@@ -154,12 +152,11 @@ program
 program
   .command('status')
   .description('Get your current status')
-  .action(async () => {
-    await storage.init();
-    const session = await storage.getItem('session');
+  .action(() => {
+    const session = db.getSync('session');
 
     if (typeof session === 'undefined') {
-      console.log("You don't have an active session. Start one with \`codecave enter\`")
+      console.warn("You don't have an active session. Start one with \`codecave enter\`")
       return;
     }
 
@@ -171,15 +168,14 @@ program
   .command('emerge')
   .alias('exit')
   .description('Emerge from the cave (end the session)')
-  .action(async () => {
+  .action(() => {
     emerge();
   });
 
-const emerge = async () => {
+const emerge = () => {
   console.log("Emerging from the cave...".yellow);
 
-  await storage.init();
-  const session = await storage.getItem('session');
+  const session = db.getSync('session');
 
   if (typeof session === 'undefined') {
     console.log("You don't have an active session. Start one with \`codecave enter\`")
@@ -190,7 +186,7 @@ const emerge = async () => {
     console.log(`You are emerging ${moment().to(session.end, true).red} early.`)
   }
 
-  const token = await storage.getItem('slackToken');
+  const token = db.getSync('slackToken');
 
   fetch(`https://slack.com/api/users.profile.set?token=${token}&profile=${JSON.stringify(DEFAULT_STATUS)}`, {
     method: "POST"
@@ -200,81 +196,8 @@ const emerge = async () => {
     method: "POST"
   });
 
-  storage.removeItem('session');
+  db.deleteSync('session');
 };
 
 program.parse(process.argv);
 
-
-/**
- * Create an OAuth2 client with the given credentials, and then execute the
- * given callback function.
- * @param {Object} credentials The authorization client credentials.
- * @param {function} callback The callback to call with the authorized client.
- * @return {function} if error in reading credentials.json asks for a new one.
- */
- function authorize(credentials, callback) {
-  const {client_secret, client_id, redirect_uris} = credentials.installed;
-  let token = {};
-  const oAuth2Client = new google.auth.OAuth2(
-      client_id, client_secret, redirect_uris[0]);
-
-  // Check if we have previously stored a token.
-  try {
-    token = fs.readFileSync(TOKEN_PATH);
-  } catch (err) {
-    return getAccessToken(oAuth2Client, callback);
-  }
-  oAuth2Client.setCredentials(JSON.parse(token));
-  callback(oAuth2Client);
-}
-
-/**
- * Get and store new token after prompting for user authorization, and then
- * execute the given callback with the authorized OAuth2 client.
- * @param {google.auth.OAuth2} oAuth2Client The OAuth2 client to get token for.
- * @param {getEventsCallback} callback The callback for the authorized client.
- */
- function getAccessToken(oAuth2Client, callback) {
-  const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
-  });
-  console.log('Authorize this app by visiting this url:', authUrl);
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-  rl.question('Enter the code from that page here: ', (code) => {
-    rl.close();
-    oAuth2Client.getToken(code, (err, token) => {
-      if (err) return callback(err);
-      oAuth2Client.setCredentials(token);
-      // Store the token to disk for later program executions
-      try {
-        fs.writeFileSync(TOKEN_PATH, JSON.stringify(token));
-        // console.log('Token stored to', TOKEN_PATH);
-      } catch (err) {
-        console.error(err);
-      }
-      callback(oAuth2Client);
-    });
-  });
-}
-
-function createEvent(start, end) {
-  return (auth) => {
-    const calendar = google.calendar({version: 'v3', auth});
-
-    calendar.events.insert({
-      auth: auth,
-      calendarId: 'primary',
-      resource: getEvent(start, end),
-    }, function(err, event) {
-      if (err) {
-        console.log('There was an error contacting the Calendar service: ' + err);
-        return;
-      }
-    });
-  };
-}
