@@ -252,7 +252,7 @@ fs@^0.0.1-security:
   version "0.0.1-security"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/fs/-/fs-0.0.1-security.tgz#8a7bd37186b6dddf3813f23858b57ecaaf5e41d4"
 
-gcp-metadata@^0.6.2:
+gcp-metadata@^0.6.3:
   version "0.6.3"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/gcp-metadata/-/gcp-metadata-0.6.3.tgz#4550c08859c528b370459bd77a7187ea0bdbc4ab"
   dependencies:
@@ -267,12 +267,12 @@ getpass@^0.1.1:
     assert-plus "^1.0.0"
 
 google-auth-library@^1.3.1:
-  version "1.4.0"
-  resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/google-auth-library/-/google-auth-library-1.4.0.tgz#27dae3b6aceadcc115a9910b4f1ed27b68b1eb0b"
+  version "1.5.0"
+  resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/google-auth-library/-/google-auth-library-1.5.0.tgz#d9068f8bad9017224a4c41abcdcb6cf6a704e83b"
   dependencies:
     axios "^0.18.0"
-    gcp-metadata "^0.6.2"
-    gtoken "^2.2.0"
+    gcp-metadata "^0.6.3"
+    gtoken "^2.3.0"
     jws "^3.1.4"
     lodash.isstring "^4.0.1"
     lru-cache "^4.1.2"
@@ -295,7 +295,7 @@ googleapis@27:
     string-template "1.0.0"
     uuid "^3.2.1"
 
-gtoken@^2.2.0:
+gtoken@^2.3.0:
   version "2.3.0"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/gtoken/-/gtoken-2.3.0.tgz#4e0ffc16432d7041a1b3dbc1d97aac17a5dc964a"
   dependencies:
@@ -467,10 +467,6 @@ lodash.isstring@^4.0.1:
 lodash@^4.14.0, lodash@^4.3.0:
   version "4.17.10"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/lodash/-/lodash-4.17.10.tgz#1b7793cf7259ea38fb3661d4d38b3260af8ae4e7"
-
-lokijs@^1.5.4:
-  version "1.5.4"
-  resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/lokijs/-/lokijs-1.5.4.tgz#4622595c6bf1772930663ab3ad50d1f629b6cc30"
 
 lru-cache@^4.1.2:
   version "4.1.3"

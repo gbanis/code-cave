@@ -11,6 +11,12 @@ Pick how long you want to be in "code cave" mode and it:
 
 ![codecave](https://git.hubteam.com/storage/user/519/files/c3c1e3cc-58ff-11e8-9567-6be9acdc91a8)
 
+### Setup
+
+Install the latest node version. I used `$ nvm install v9.3.0`.
+
+Run yarn `$ yarn`.
+
 ### Usage
 
 `codecave config` - set up your slack and google cal creds
