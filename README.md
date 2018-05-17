@@ -28,3 +28,9 @@ You are probably good to go.
 `codecave enter` - enter the cave, after N minutes you will exit automagically
 
 `codecave emerge` - exit the cave and come back to this dull and boring world
+
+### Warning
+
+This is a super alpha version. It is very likely not going to work for you. Proceed with caution.
+
+If you have questions ping me @gbanis on slack. I'll get back to you when I emerge from the cave. 😄
