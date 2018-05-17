@@ -12,7 +12,7 @@ const getDefaultStatus = () => {
 
 const getCaveStatus = (endTime) => {
   return {
-    "status_text": `In code cave. I'll be back at ${endTime}`,
+    "status_text": `In code cave. Be back at ${endTime}`,
     "status_emoji": ":code-cave:"
   };
 };

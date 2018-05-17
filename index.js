@@ -110,7 +110,7 @@ program
         }
         return true;
       },
-      default: 60
+      default: 30
     }]).then(answers => {
       const durationMins = parseInt(answers.durationMins);
       const start = moment().valueOf();
