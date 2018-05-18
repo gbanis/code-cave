@@ -88,6 +88,10 @@ buffer-equal-constant-time@1.0.1:
   version "1.0.1"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/buffer-equal-constant-time/-/buffer-equal-constant-time-1.0.1.tgz#f8e71132f7ffe6e01a5c9697a4c6f3e48d5cc819"
 
+buffers@^0.1.1:
+  version "0.1.1"
+  resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/buffers/-/buffers-0.1.1.tgz#b24579c3bed4d6d396aeee6d9a8ae7f5482ab7bb"
+
 caseless@~0.12.0:
   version "0.12.0"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
@@ -578,6 +582,12 @@ node-fetch@^2.1.2:
 node-forge@^0.7.4:
   version "0.7.5"
   resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/node-forge/-/node-forge-0.7.5.tgz#6c152c345ce11c52f465c2abd957e8639cd674df"
+
+node-osascript@^2.0.0:
+  version "2.0.0"
+  resolved "https://npm.hubteam.com/npm-nexus/repository/npm-all/node-osascript/-/node-osascript-2.0.0.tgz#26e22bfd067d6e74d154570d9857efc6020080c9"
+  dependencies:
+    buffers "^0.1.1"
 
 node-persist@^3.0.0:
   version "3.0.0"

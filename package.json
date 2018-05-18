@@ -16,6 +16,7 @@
     "moment": "^2.22.1",
     "mongoose": "^5.1.1",
     "node-fetch": "^2.1.2",
+    "node-osascript": "^2.0.0",
     "node-persist": "^3.0.0",
     "parse-duration": "^0.1.1",
     "persistent-cache": "^1.1.1",
