@@ -15,6 +15,7 @@ const cache = require('persistent-cache');
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
 const { toggleDnd } = require ('./apis/applescript.js');
+const doNotDisturb = require('do-not-disturb');
 
 const db = cache();
 
@@ -119,28 +120,18 @@ program
       const token = db.getSync('slackToken')
 
       setCaveStatus(token, moment(end).format('h:mm a'));
-      console.log("Slack status updated ✅");
-
       setDnd(token, durationMins);
-      console.log("Slack DND set ✅");
-
       authorize(createEvent(start, end));
-      console.log("Calendar event created ✅");
-
-      toggleDnd();
-      console.log("Toggled Mac OSX DND ✅");
+      doNotDisturb.on();
 
       const job = new CronJob(moment(end).toDate(), function() {
           emerge();
         }, function () {
-
           console.log("Welcome back!")
-          /* This function is executed when the job stops */
         },
         true,
         moment.tz.guess()
       );
-
 
       db.putSync('session', {
         start: start,
@@ -194,7 +185,7 @@ const emerge = () => {
 
   setDefaultStatus(token);
   endDnd(token);
-  toggleDnd();
+  doNotDisturb.off();
 
   db.deleteSync('session');
 };
