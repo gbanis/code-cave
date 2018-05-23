@@ -4,7 +4,7 @@ const program = require('commander');
 const { prompt } = require('inquirer');
 const moment = require('moment');
 const colors = require ('colors');
-const { CronJob } = require('cron');
+const { startCron, stopCron } = require('./utils/cron.js');
 const cache = require('persistent-cache');
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
@@ -85,10 +85,10 @@ program
 
 
 program
-  .command('enter')
+  .command('enter <durationMins>')
   .alias('e')
   .description('Enter the code cave (start session)')
-  .action(() => {
+  .action((durationMins) => {
     const session = db.getSync('session');
 
     if (typeof session !== 'undefined') {
@@ -96,47 +96,25 @@ program
       return;
     }
 
-    prompt([{
-      type : 'input',
-      name : 'durationMins',
-      message : 'When would you like to emerge? (duration in minutes)',
-      validate: (input) => {
-        const duration = parseInt(input);
-        if (typeof duration !== "number" || duration <= 0) {
-          return `Could not parse duration: ${input}. Please try again. (Example: 30)`
-        }
-        return true;
-      },
-      default: 30
-    }]).then(answers => {
-      const durationMins = parseInt(answers.durationMins);
-      const start = moment().valueOf();
-      const end = moment().add(durationMins, 'minutes').valueOf();
-      const token = db.getSync('slackToken')
-
-      setCaveStatus(token, moment(end).format('h:mm a'));
-      setDnd(token, durationMins);
-      authorize(createEvent(start, end));
-      doNotDisturb.on();
-
-      const job = new CronJob(moment(end).toDate(), function() {
-          emerge();
-        }, function () {
-          console.log("Welcome back!")
+    if (typeof durationMins === 'undefined') {
+      prompt([{
+        type : 'input',
+        name : 'durationMins',
+        message : 'When would you like to emerge? (duration in minutes)',
+        validate: (input) => {
+          const duration = parseInt(input);
+          if (typeof duration !== "number" || duration <= 0) {
+            return `Could not parse duration: ${input}. Please try again. (Example: 30)`
+          }
+          return true;
         },
-        true,
-        moment.tz.guess()
-      );
-
-      db.putSync('session', {
-        start: start,
-        durationMins: durationMins,
-        end: end
+        default: 30
+      }]).then(answers => {
+        enter(answers.durationMins);
       });
-
-      console.log(`Entering the cave. You shall emerge at ${moment(end).format('h:mm a').green}`);
-      console.log("(this process will self-terminate when you emerge)".grey);
-    });
+    } else {
+      enter(durationMins);
+    }
   });
 
 program
@@ -162,6 +140,45 @@ program
     emerge();
   });
 
+const enter = durationMinsStr => {
+  const durationMins = parseInt(durationMinsStr);
+
+  const start = moment().valueOf();
+  const end = moment().add(durationMins, 'minutes').valueOf();
+  const token = db.getSync('slackToken')
+
+  setCaveStatus(token, moment(end).format('h:mm a'));
+  setDnd(token, durationMins);
+  authorize(createEvent(start, end));
+  doNotDisturb.on();
+
+  startCron(end, emerge);
+
+  db.putSync('session', {
+    start: start,
+    durationMins: durationMins,
+    end: end
+  });
+
+  console.log(`Entering the cave. You shall emerge at ${moment(end).format('h:mm a').green}`);
+  console.log("(this process will self-terminate when you emerge)".grey);
+
+  prompt([{
+    type : 'input',
+    name : 'emergeEarly',
+    message : 'Type "emerge" if you like to emerge early:',
+    validate: (input) => {
+      if (input !== "emerge") {
+        return "";
+      }
+      return true;
+    }
+  }]).then(answers => {
+    emerge();
+    stopCron();
+  });
+};
+
 const emerge = () => {
   console.log("Emerging from the cave...".yellow);
 
@@ -184,6 +201,7 @@ const emerge = () => {
 
   db.deleteSync('session');
 };
+
 
 program.parse(process.argv);
 
