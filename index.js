@@ -1,10 +1,5 @@
 #!/usr/bin/env node
 
-// TODO:
-// Longer Google oauth
-// Fix writing file
-// move google setup into configure action
-
 const program = require('commander');
 const { prompt } = require('inquirer');
 const moment = require('moment');

@@ -1,4 +1,4 @@
-![code-cave](https://git.hubteam.com/storage/user/519/files/11fd42ba-5965-11e8-807d-28f08b974210)
+![11fd42ba-5965-11e8-807d-28f08b974210](https://user-images.githubusercontent.com/7933929/40399654-9136e6e8-5e0c-11e8-9909-1eb6ae758814.png)
 
 ### How it works
 
@@ -10,7 +10,7 @@ Pick how long you want to be in "code cave" mode and it:
 - resets everything when the time elapses and you "emerge" from the cave
 - makes you a better programmer (j/k only using rxjava makes you a better programmer)
 
-![codecave](https://git.hubteam.com/storage/user/519/files/c3c1e3cc-58ff-11e8-9567-6be9acdc91a8)
+![c3c1e3cc-58ff-11e8-9567-6be9acdc91a8](https://user-images.githubusercontent.com/7933929/40399660-a296fd4c-5e0c-11e8-8ccd-0e8c556bc25e.gif)
 
 ### Setup
 
@@ -41,10 +41,10 @@ If you have questions ping me @gbanis on slack. I'll get back to you when I emer
 
 Added mac dnd toggle.
 
-![dnd](https://git.hubteam.com/storage/user/519/files/d22f1934-5a2b-11e8-8dc8-20859aaa23db)
+![d22f1934-5a2b-11e8-8dc8-20859aaa23db](https://user-images.githubusercontent.com/7933929/40399667-aff901d8-5e0c-11e8-87f8-01966a66361a.gif)
 
 #### v1.0
 
 Basic functionality. Set slack status, slack dnd, create google cal.
 
-![codecave](https://git.hubteam.com/storage/user/519/files/c3c1e3cc-58ff-11e8-9567-6be9acdc91a8)
+![c3c1e3cc-58ff-11e8-9567-6be9acdc91a8](https://user-images.githubusercontent.com/7933929/40399660-a296fd4c-5e0c-11e8-8ccd-0e8c556bc25e.gif)
