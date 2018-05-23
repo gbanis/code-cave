@@ -9,7 +9,7 @@ const cache = require('persistent-cache');
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
-const { toggleDnd } = require ('./apis/applescript.js');
+const { openSlack, closeSlack, openJasper, closeJasper } = require ('./apis/applescript.js');
 const doNotDisturb = require('do-not-disturb');
 
 const db = cache();
@@ -85,8 +85,7 @@ program
 
 
 program
-  .command('enter <durationMins>')
-  .alias('e')
+  .command('enter [durationMins]')
   .description('Enter the code cave (start session)')
   .action((durationMins) => {
     const session = db.getSync('session');
@@ -135,6 +134,7 @@ program
 program
   .command('emerge')
   .alias('exit')
+  .alias('end')
   .description('Emerge from the cave (end the session)')
   .action(() => {
     emerge();
@@ -151,6 +151,8 @@ const enter = durationMinsStr => {
   setDnd(token, durationMins);
   authorize(createEvent(start, end));
   doNotDisturb.on();
+  closeSlack();
+  closeJasper();
 
   startCron(end, emerge);
 
@@ -198,6 +200,8 @@ const emerge = () => {
   setDefaultStatus(token);
   endDnd(token);
   doNotDisturb.off();
+  openSlack();
+  openJasper();
 
   db.deleteSync('session');
 };
