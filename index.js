@@ -9,7 +9,7 @@ const cache = require('persistent-cache');
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
-const { openSlack, closeSlack, openJasper, closeJasper } = require ('./apis/applescript.js');
+const { openSlack, closeSlack, openJasper, closeJasper, reloadGooglePlayMusicChrome } = require ('./apis/applescript.js');
 const doNotDisturb = require('do-not-disturb');
 
 const db = cache();
@@ -153,6 +153,7 @@ const enter = durationMinsStr => {
   doNotDisturb.on();
   closeSlack();
   closeJasper();
+  reloadGooglePlayMusicChrome();
 
   startCron(end, emerge);
 
