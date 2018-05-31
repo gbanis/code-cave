@@ -205,6 +205,8 @@ const emerge = () => {
   openJasper();
 
   db.deleteSync('session');
+
+  process.exit();
 };
 
 

@@ -8,7 +8,8 @@ const startCron = (endTs, callback) => {
     moment(endTs).toDate(),
     callback,
     function () {
-      console.log("Welcome back!")
+      console.log("Welcome back!");
+      process.exit();
     },
     false,
     moment.tz.guess()
