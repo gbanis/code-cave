@@ -23,6 +23,38 @@ program
   .description('Code Cave');
 
 program
+  .command('enter [durationMins]')
+  .description('Enter the code cave (start session)')
+  .action((durationMins) => {
+    const session = db.getSync('session');
+
+    if (typeof session !== 'undefined') {
+      console.log(`You are already in the cave! Your session started ${moment(session.start).fromNow().green}.`);
+      return;
+    }
+
+    if (typeof durationMins === 'undefined') {
+      prompt([{
+        type : 'input',
+        name : 'durationMins',
+        message : 'When would you like to emerge? (duration in minutes)',
+        validate: (input) => {
+          const duration = parseInt(input);
+          if (typeof duration !== "number" || duration <= 0) {
+            return `Could not parse duration: ${input}. Please try again. (Example: 30)`
+          }
+          return true;
+        },
+        default: 30
+      }]).then(answers => {
+        enter(answers.durationMins);
+      });
+    } else {
+      enter(durationMins);
+    }
+  });
+
+program
   .command('defaults')
   .description('Set up default messages')
   .action(() => {
@@ -83,39 +115,6 @@ program
     });
   });
 
-
-program
-  .command('enter [durationMins]')
-  .description('Enter the code cave (start session)')
-  .action((durationMins) => {
-    const session = db.getSync('session');
-
-    if (typeof session !== 'undefined') {
-      console.log(`You are already in the cave! Your session started ${moment(session.start).fromNow().green}.`);
-      return;
-    }
-
-    if (typeof durationMins === 'undefined') {
-      prompt([{
-        type : 'input',
-        name : 'durationMins',
-        message : 'When would you like to emerge? (duration in minutes)',
-        validate: (input) => {
-          const duration = parseInt(input);
-          if (typeof duration !== "number" || duration <= 0) {
-            return `Could not parse duration: ${input}. Please try again. (Example: 30)`
-          }
-          return true;
-        },
-        default: 30
-      }]).then(answers => {
-        enter(answers.durationMins);
-      });
-    } else {
-      enter(durationMins);
-    }
-  });
-
 program
   .command('status')
   .description('Get your current status')
@@ -166,20 +165,21 @@ const enter = durationMinsStr => {
   console.log(`Entering the cave. You shall emerge at ${moment(end).format('h:mm a').green}`);
   console.log("(this process will self-terminate when you emerge)".grey);
 
-  prompt([{
-    type : 'input',
-    name : 'emergeEarly',
-    message : 'Type "emerge" if you like to emerge early:',
-    validate: (input) => {
-      if (input !== "emerge") {
-        return "";
-      }
-      return true;
-    }
-  }]).then(answers => {
-    emerge();
-    stopCron();
-  });
+// Doesnt work properly
+  // prompt([{
+  //   type : 'input',
+  //   name : 'emergeEarly',
+  //   message : 'Type "emerge" if you like to emerge early:',
+  //   validate: (input) => {
+  //     if (input !== "emerge") {
+  //       return "";
+  //     }
+  //     return true;
+  //   }
+  // }]).then(answers => {
+  //   emerge();
+  //   stopCron();
+  // });
 };
 
 const emerge = () => {
@@ -206,7 +206,7 @@ const emerge = () => {
 
   db.deleteSync('session');
 
-  process.exit();
+  // process.exit();
 };
 
 
