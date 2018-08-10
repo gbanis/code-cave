@@ -1,12 +1,17 @@
 var osascript = require('node-osascript');
 
 const openSlack = () => {
-  osascript.execute(`tell application "Slack" to activate`);
+  // osascript.execute(`tell application "Slack" to activate`);
+  const closeSlack = () => {
+    osascript.execute(`tell application "Slack"
+        set miniaturized of window 1 to false
+      end tell`);
+  };
 };
 
 const closeSlack = () => {
   osascript.execute(`tell application "Slack"
-      quit
+      set miniaturized of window 1 to true
     end tell`);
 };
 
