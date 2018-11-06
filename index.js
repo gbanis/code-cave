@@ -6,6 +6,7 @@ const moment = require('moment');
 const colors = require ('colors');
 const { startCron, stopCron } = require('./utils/cron.js');
 const cache = require('persistent-cache');
+const exec = require('child_process').exec;
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
@@ -164,22 +165,6 @@ const enter = durationMinsStr => {
 
   console.log(`Entering the cave. You shall emerge at ${moment(end).format('h:mm a').green}`);
   console.log("(this process will self-terminate when you emerge)".grey);
-
-// Doesnt work properly
-  // prompt([{
-  //   type : 'input',
-  //   name : 'emergeEarly',
-  //   message : 'Type "emerge" if you like to emerge early:',
-  //   validate: (input) => {
-  //     if (input !== "emerge") {
-  //       return "";
-  //     }
-  //     return true;
-  //   }
-  // }]).then(answers => {
-  //   emerge();
-  //   stopCron();
-  // });
 };
 
 const emerge = () => {
@@ -206,7 +191,7 @@ const emerge = () => {
 
   db.deleteSync('session');
 
-  // process.exit();
+  exec("exit"); // to close terminal
 };
 
 

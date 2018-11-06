@@ -52,7 +52,6 @@ const reloadGooglePlayMusicChrome = () => {
     end repeat
 
     if found then
-      tell theTab to reload
       set theWindow's active tab index to theTabIndex
       set index of theWindow to 1
     else
