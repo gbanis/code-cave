@@ -28,7 +28,7 @@ const closeJasper = () => {
 const reloadGooglePlayMusicChrome = () => {
   osascript.execute(`tell application "Google Chrome"
     activate
-    set theUrl to "https://play.google.com/music"
+    set theUrl to "https://music.youtube.com"
 
     if (count every window) = 0 then
       make new window
