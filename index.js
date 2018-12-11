@@ -80,39 +80,26 @@ program
     prompt([{
       type: 'input',
       name: 'slackToken',
-      message: 'Enter your slack token:',
-      validate: (input) => {
-        if (input.length <= 0 && typeof db.getSync('slackToken') === 'undefined') {
-          return "This doesn't look like a slack token 😬. \nGet one and try again: https://api.slack.com/custom-integrations/legacy-tokens"
-        }
-        return true;
-      }
+      message: 'Enter your slack token (https://api.slack.com/custom-integrations/legacy-tokens):\n'
     }, {
       type: 'input',
       name: 'googleClientSecret',
-      message: 'Enter Google client secret:',
-      validate: (input) => {
-        if (input.length <= 0 && typeof db.getSync('googleClientSecret') === 'undefined') {
-          return "This doesn't look like a Google client secret 😬. \nGet one and try again: https://console.developers.google.com/apis/credentials"
-        }
-        return true;
-      }
+      message: 'Enter Google client secret JSON (https://console.developers.google.com/apis/credentials):\n'
     }]).then(answers => {
-      if (answers.slackToken.length == 0 ) {
+      if (answers.slackToken.length === 0 ) {
         console.log('Not updating slack token'.yellow);
       } else {
         db.putSync('slackToken', answers.slackToken);
         console.log('Updated slack token'.green);
       }
 
-      if (answers.googleClientSecret.length == 0 ) {
+      if (answers.googleClientSecret.length === 0 ) {
         console.log('Not updating Google client secret'.yellow);
       } else {
         db.putSync('googleClientSecret', answers.googleClientSecret);
         console.log('Updated Google client secret'.green);
+        getAccessToken();
       }
-
-      getAccessToken();
     });
   });
 
