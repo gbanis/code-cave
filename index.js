@@ -66,7 +66,7 @@ program
     }, {
       type: 'input',
       name: 'defaultEmoji',
-      message: 'Enter default emoji:'
+      message: 'Enter default emoji (including colons):'
     }]).then(answers => {
       db.putSync('defaultStatus', answers.defaultStatus);
       db.putSync('defaultEmoji', answers.defaultEmoji);
