@@ -10,7 +10,7 @@ const exec = require('child_process').exec;
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
 const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
-const { openSlack, closeSlack, openJasper, closeJasper, reloadGooglePlayMusicChrome } = require ('./apis/applescript.js');
+const { openSlack, closeSlack, openJasper, closeJasper, reloadGooglePlayMusicChrome, toggleDnd } = require ('./apis/applescript.js');
 const doNotDisturb = require('do-not-disturb');
 
 const db = cache();
@@ -137,7 +137,8 @@ const enter = durationMinsStr => {
   setCaveStatus(token, moment(end).format('h:mm a'));
   setDnd(token, durationMins);
   authorize(createEvent(start, end));
-  doNotDisturb.on();
+  // doNotDisturb.on();
+  toggleDnd();
   closeSlack();
   closeJasper();
   reloadGooglePlayMusicChrome();
@@ -172,9 +173,10 @@ const emerge = () => {
 
   setDefaultStatus(token);
   endDnd(token);
-  doNotDisturb.off();
+  // doNotDisturb.off();
+  toggleDnd();
   openSlack();
-  openJasper();
+  // openJasper();
 
   db.deleteSync('session');
 

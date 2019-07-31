@@ -25,6 +25,28 @@ const closeJasper = () => {
     end tell`);
 };
 
+const toggleDnd = () => {
+  osascript.execute(`tell application "System Events"
+    tell application process "SystemUIServer"
+      try
+        if exists menu bar item "Notification Center, Do Not Disturb enabled" of menu bar 1 of application process "SystemUIServer" of application "System Events" then
+          (* It is disabled *)
+          key down option
+          click menu bar item "Notification Center, Do Not Disturb enabled" of menu bar 1
+          key up option
+        else
+          (* It is enabled *)
+          key down option
+          click menu bar item "Notification Center" of menu bar 1
+          key up option
+        end if
+      on error
+        key up option
+      end try
+    end tell
+  end tell`);
+};
+
 const reloadGooglePlayMusicChrome = () => {
   osascript.execute(`tell application "Google Chrome"
     activate
@@ -65,5 +87,6 @@ module.exports = {
   closeSlack,
   openJasper,
   closeJasper,
-  reloadGooglePlayMusicChrome
+  reloadGooglePlayMusicChrome,
+  toggleDnd
 };
