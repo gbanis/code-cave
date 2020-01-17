@@ -25,6 +25,10 @@ const closeJasper = () => {
     end tell`);
 };
 
+const openYouTubeMusic = () => {
+  osascript.execute(`tell application "YouTube Music" to activate`);
+}
+
 const reloadGooglePlayMusicChrome = () => {
   osascript.execute(`tell application "Google Chrome"
     activate
@@ -66,4 +70,5 @@ module.exports = {
   openJasper,
   closeJasper,
   reloadGooglePlayMusicChrome,
+  openYouTubeMusic,
 };
