@@ -30,14 +30,14 @@ const authorize = (callback) => {
   callback(oAuth2Client);
 };
 
-const createEvent = (start, end) => {
+const createEvent = (start, end, statusMsg) => {
   return (auth) => {
     const calendar = google.calendar({version: 'v3', auth});
 
     calendar.events.insert({
       auth: auth,
       calendarId: 'primary',
-      resource: buildEvent(start, end),
+      resource: buildEvent(start, end, statusMsg),
     }, function(err, event) {
       if (err) {
         console.log('There was an error contacting the Calendar service: ' + err);
@@ -77,10 +77,10 @@ const getAccessToken = () => {
   });
 };
 
-const buildEvent = (start, end) => {
+const buildEvent = (start, end, statusMsg) => {
   return {
-    'summary': 'Code Cave',
-    'description': 'Entering a code cave. Please interrupt only if there is an emergency.',
+    'summary': statusMsg,
+    'description': '',
     'start': {
       'dateTime': moment(start).format(),
       'timeZone': moment.tz.guess()

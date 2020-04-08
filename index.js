@@ -9,7 +9,7 @@ const cache = require('persistent-cache');
 const exec = require('child_process').exec;
 
 const { authorize, createEvent, getAccessToken } = require('./apis/googleCalendar.js');
-const { setCaveStatus, setDefaultStatus, setDnd, endDnd } = require('./apis/slack.js');
+const { setStatus, setDnd, endDnd } = require('./apis/slack.js');
 const { closeJasper, openYouTubeMusic } = require ('./apis/applescript.js');
 const doNotDisturb = require('@sindresorhus/do-not-disturb');
 
@@ -24,9 +24,9 @@ program
   .description('Code Cave');
 
 program
-  .command('enter [durationMins]')
-  .description('Enter the code cave (start session)')
-  .action((durationMins) => {
+  .command('enter [durationMins] [statusMsgArr...]')
+  .description('Enter the cave (start session)')
+  .action((durationMins, statusMsgArr) => {
     const session = db.getSync('session');
 
     if (typeof session !== 'undefined') {
@@ -48,10 +48,10 @@ program
         },
         default: 30
       }]).then(answers => {
-        enter(answers.durationMins);
+        enter(answers.durationMins, statusMsgArr);
       });
     } else {
-      enter(durationMins);
+      enter(durationMins, statusMsgArr);
     }
   });
 
@@ -128,16 +128,17 @@ program
   });
 
 
-const enter = durationMinsStr => {
+const enter = (durationMinsStr, statusArr) => {
   const durationMins = parseInt(durationMinsStr);
 
   const start = moment().valueOf();
   const end = moment().add(durationMins, 'minutes').valueOf();
-  const token = db.getSync('slackToken')
-
-  setCaveStatus(token, moment(end).format('h:mm a'));
+  const token = db.getSync('slackToken');
+  const status = getStatusOrDefault(end, statusArr)
+  
+  setStatus(token, status);
   setDnd(token, durationMins);
-  authorize(createEvent(start, end));
+  authorize(createEvent(start, end, status.status_text));
   doNotDisturb.enable();
   closeJasper();
   openYouTubeMusic();
@@ -170,7 +171,7 @@ const emerge = () => {
 
   const token = db.getSync('slackToken');
 
-  setDefaultStatus(token);
+  setStatus(token, getEmergedStatus());
   endDnd(token);
   doNotDisturb.disable();
 
@@ -179,6 +180,38 @@ const emerge = () => {
   exec("exit"); // to close terminal
 };
 
+const getEmergedStatus = () => {
+  const status = db.getSync('defaultStatus');
+  const emoji = db.getSync('defaultEmoji');
+  return {
+    "status_text": status,
+    "status_emoji": emoji
+  };
+};
+
+const getStatusOrDefault = (endTime, statusArr) => {
+  if (statusArr instanceof Array && statusArr.length > 2) {
+    return {
+      "status_text": `${statusArr.slice(1).join(' ')} (till ${moment(endTime).format('h:mm a')})`,
+      "status_emoji": statusArr[0]
+    };
+  } else if (statusArr instanceof Array && statusArr.length === 2) {
+    return {
+      "status_text": `${statusArr[1]} (till ${moment(endTime).format('h:mm a')})`,
+      "status_emoji": statusArr[0]
+    };
+  } else if (statusArr instanceof Array && statusArr.length === 1) {
+    return {
+      "status_text": `${statusArr[0]} (till ${moment(endTime).format('h:mm a')})`,
+      "status_emoji": ''
+    };
+  } else {
+    return {
+      "status_text": `In code cave (back at ${moment(endTime).format('h:mm a')})`,
+      "status_emoji": ":code-cave:"
+    };
+  } 
+};
 
 program.parse(process.argv);
 
