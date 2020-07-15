@@ -14,8 +14,8 @@ Pick how long you want to be in "code cave" mode and it:
 
 ### Setup
 
-- Install the latest node version. I used `$ nvm install v9.3.0`.
-- Run yarn `$ yarn install`.
+- Install the latest node version. I used `$ nvm install v9.3.0`
+- Run yarn `$ yarn install`
 - Symlink this package `$ yarn link` (from within the `code-cave` directory)
 - Set up your default status: `$ codecave defaults`
 - Set up your slack and google cal creds: `$ codecave config`
