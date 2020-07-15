@@ -140,8 +140,8 @@ const enter = (durationMinsStr, statusArr) => {
   setDnd(token, durationMins);
   authorize(createEvent(start, end, status.status_text));
   doNotDisturb.enable();
-  closeJasper();
-  openYouTubeMusic();
+  // closeJasper();
+  // openYouTubeMusic();
 
   startCron(end, emerge);
 
