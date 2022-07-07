@@ -14,7 +14,7 @@
     "fs": "^0.0.1-security",
     "googleapis": "^54.0.0",
     "inquirer": "^5.2.0",
-    "moment": "^2.22.1",
+    "moment": "^2.29.4",
     "mongoose": "^5.9.24",
     "node-fetch": "^2.1.2",
     "node-osascript": "^2.0.0",
